@@ -1,0 +1,58 @@
+meta {
+  name: Create Order
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/orders
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "customer_name": "John Doe",
+    "customer_email": "john.doe@example.com",
+    "items": [
+      {
+        "product": "Laptop",
+        "quantity": 1,
+        "price": 999.99
+      },
+      {
+        "product": "Mouse",
+        "quantity": 2,
+        "price": 25.00
+      }
+    ],
+    "total_amount": 1049.99
+  }
+}
+
+docs {
+  # Create Order (Command)
+
+  Creates a new order in the system. This is a write operation that:
+  1. Saves the order to PostgreSQL (write database)
+  2. Dispatches an OrderCreated event to RabbitMQ
+  3. The consumer picks up the event and syncs to MongoDB (read database)
+
+  ## Request Body
+
+  - `customer_name` (string, required): Customer's full name
+  - `customer_email` (string, required): Customer's email address
+  - `items` (array, required): List of order items
+    - `product` (string): Product name
+    - `quantity` (integer): Quantity ordered
+    - `price` (number): Unit price
+  - `total_amount` (number, required): Total order amount
+
+  ## Response
+
+  Returns the created order ID and success message.
+}

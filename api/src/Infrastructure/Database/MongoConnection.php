@@ -15,7 +15,7 @@ class MongoConnection
     public function __construct(
         private readonly string $host,
         private readonly int $port,
-        private readonly string $database,
+        private readonly string $databaseName,
         private readonly string $username,
         private readonly string $password
     ) {
@@ -33,16 +33,18 @@ class MongoConnection
     private function connect(): void
     {
         $uri = sprintf(
-            'mongodb://%s:%s@%s:%d',
+            'mongodb://%s:%s@%s:%d/%s?authSource=%s',
             $this->username,
             $this->password,
             $this->host,
-            $this->port
+            $this->port,
+            $this->databaseName,
+            $this->databaseName
         );
 
         try {
             $this->client = new Client($uri);
-            $this->database = $this->client->selectDatabase($this->database);
+            $this->database = $this->client->selectDatabase($this->databaseName);
         } catch (\Exception $e) {
             throw new \RuntimeException('MongoDB connection failed: ' . $e->getMessage());
         }

@@ -1,7 +1,10 @@
 volumes:
   postgres_data:
+    name: cqrs_postgres_data
   mongodb_data:
+    name: cqrs_mongodb_data
   rabbitmq_data:
+    name: cqrs_rabbitmq_data
 
 networks:
   cqrs-network:
@@ -32,17 +35,18 @@ services:
     image: mongo:7-jammy
     container_name: cqrs_mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
       MONGO_INITDB_DATABASE: orders_read
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
+      - ./docker/mongodb/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     networks:
       - cqrs-network
     healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/orders_read -u mongo -p mongo --quiet
       interval: 10s
       timeout: 5s
       retries: 5
@@ -53,6 +57,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
+      RABBITMQ_ERLANG_COOKIE: CQRSEVENTDRIVENCOOKIE
     ports:
       - "5672:5672"
       - "15672:15672"

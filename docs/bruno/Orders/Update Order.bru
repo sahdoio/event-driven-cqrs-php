@@ -1,0 +1,73 @@
+meta {
+  name: Update Order
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{baseUrl}}/orders/{{orderId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "status": "completed"
+  }
+}
+
+vars:pre-request {
+  orderId: replace-with-actual-order-id
+}
+
+docs {
+  # Update Order (Command)
+
+  Updates an existing order. This is a write operation that:
+  1. Updates the order in PostgreSQL (write database)
+  2. Dispatches an OrderUpdated event to RabbitMQ
+  3. The consumer picks up the event and syncs changes to MongoDB (read database)
+
+  ## Path Parameters
+
+  - `id` (string, required): The order UUID
+
+  ## Request Body
+
+  You can update one or more of the following fields:
+
+  - `items` (array, optional): Updated list of order items
+  - `total_amount` (number, optional): Updated total amount
+  - `status` (string, optional): Order status. Values: "pending", "processing", "completed", "cancelled"
+
+  ## Response
+
+  Returns a success message.
+
+  ## Example: Update Status
+
+  ```json
+  {
+    "status": "completed"
+  }
+  ```
+
+  ## Example: Update Items
+
+  ```json
+  {
+    "items": [
+      {
+        "product": "Laptop",
+        "quantity": 2,
+        "price": 999.99
+      }
+    ],
+    "total_amount": 1999.98
+  }
+  ```
+}

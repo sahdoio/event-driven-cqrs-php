@@ -1,0 +1,49 @@
+meta {
+  name: Get All Orders
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/orders
+  body: none
+  auth: none
+}
+
+docs {
+  # Get All Orders (Query)
+
+  Retrieves all orders from the system. This is a read operation that:
+  - Fetches data from MongoDB (read database)
+  - Returns optimized read model data
+
+  ## Response
+
+  Returns an array of orders with the following structure:
+
+  ```json
+  {
+    "statusCode": 200,
+    "data": [
+      {
+        "id": "550e8400-e29b-41d4-a716-446655440000",
+        "customer_name": "John Doe",
+        "customer_email": "john.doe@example.com",
+        "items": [
+          {
+            "product": "Laptop",
+            "quantity": 1,
+            "price": 999.99
+          }
+        ],
+        "total_amount": 999.99,
+        "status": "pending",
+        "created_at": "2025-01-19 10:30:00",
+        "updated_at": null
+      }
+    ]
+  }
+  ```
+
+  Orders are sorted by creation date in descending order (newest first).
+}

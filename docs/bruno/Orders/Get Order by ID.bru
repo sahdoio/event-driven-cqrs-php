@@ -1,0 +1,67 @@
+meta {
+  name: Get Order by ID
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/orders/{{orderId}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  orderId: replace-with-actual-order-id
+}
+
+docs {
+  # Get Order by ID (Query)
+
+  Retrieves a specific order by its ID. This is a read operation that:
+  - Fetches data from MongoDB (read database)
+  - Returns optimized read model data
+
+  ## Path Parameters
+
+  - `id` (string, required): The order UUID
+
+  ## Response
+
+  Returns a single order object:
+
+  ```json
+  {
+    "statusCode": 200,
+    "data": {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "customer_name": "John Doe",
+      "customer_email": "john.doe@example.com",
+      "items": [
+        {
+          "product": "Laptop",
+          "quantity": 1,
+          "price": 999.99
+        }
+      ],
+      "total_amount": 999.99,
+      "status": "pending",
+      "created_at": "2025-01-19 10:30:00",
+      "updated_at": null
+    }
+  }
+  ```
+
+  ## Error Response
+
+  If the order is not found:
+
+  ```json
+  {
+    "statusCode": 404,
+    "error": {
+      "type": "RESOURCE_NOT_FOUND",
+      "description": "The order you requested does not exist."
+    }
+  }
+  ```
+}

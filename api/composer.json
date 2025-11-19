@@ -34,7 +34,7 @@
         "enqueue/amqp-lib": "^0.10",
         "enqueue/enqueue": "^0.10",
         "ramsey/uuid": "^4.7",
-        "mongodb/mongodb": "^1.17",
+        "mongodb/mongodb": "^2.0",
         "league/event": "^3.0"
     },
     "require-dev": {
