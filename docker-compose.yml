@@ -1,0 +1,137 @@
+volumes:
+  postgres_data:
+  mongodb_data:
+  rabbitmq_data:
+
+networks:
+  cqrs-network:
+    driver: bridge
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cqrs_postgres
+    environment:
+      POSTGRES_DB: orders_write
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - cqrs-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7-jammy
+    container_name: cqrs_mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: orders_read
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - cqrs-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cqrs_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cqrs-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: cqrs_php
+    working_dir: /var/www
+    volumes:
+      - ./api:/var/www
+    ports:
+      - "8080:8080"
+    networks:
+      - cqrs-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_WRITE_HOST: postgres
+      DB_WRITE_PORT: 5432
+      DB_WRITE_NAME: orders_write
+      DB_WRITE_USER: postgres
+      DB_WRITE_PASS: postgres
+      DB_READ_HOST: mongodb
+      DB_READ_PORT: 27017
+      DB_READ_NAME: orders_read
+      DB_READ_USER: mongo
+      DB_READ_PASS: mongo
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: rabbitmq
+      RABBITMQ_PASS: rabbitmq
+    command: php -S 0.0.0.0:8080 -t public
+
+  consumer:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: cqrs_consumer
+    working_dir: /var/www
+    volumes:
+      - ./api:/var/www
+    networks:
+      - cqrs-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      DB_WRITE_HOST: postgres
+      DB_WRITE_PORT: 5432
+      DB_WRITE_NAME: orders_write
+      DB_WRITE_USER: postgres
+      DB_WRITE_PASS: postgres
+      DB_READ_HOST: mongodb
+      DB_READ_PORT: 27017
+      DB_READ_NAME: orders_read
+      DB_READ_USER: mongo
+      DB_READ_PASS: mongo
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USER: rabbitmq
+      RABBITMQ_PASS: rabbitmq
+    command: php bin/consumer.php

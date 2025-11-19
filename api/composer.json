@@ -22,12 +22,20 @@
         }
     ],
     "require": {
-        "php": "^8.0",
+        "php": "^8.4",
         "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-mongodb": "*",
         "monolog/monolog": "^2.8",
         "php-di/php-di": "^7.0",
         "slim/psr7": "^1.5",
-        "slim/slim": "^4.10"
+        "slim/slim": "^4.10",
+        "enqueue/amqp-lib": "^0.10",
+        "enqueue/enqueue": "^0.10",
+        "ramsey/uuid": "^4.7",
+        "mongodb/mongodb": "^1.17",
+        "league/event": "^3.0"
     },
     "require-dev": {
         "jangregor/phpstan-prophecy": "^1.0.0",
