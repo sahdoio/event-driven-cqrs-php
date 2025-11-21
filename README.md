@@ -140,7 +140,7 @@ This will start:
 
 3. Verify services are running:
 ```bash
-docker-compose ps
+docker compose ps
 ```
 
 ### Service Credentials
@@ -296,26 +296,26 @@ Visit http://localhost:15672 and navigate to the "Queues" tab to see the `orders
 ### Rebuild Containers
 
 ```bash
-docker-compose down
-docker-compose up -d --build
+docker compose down
+docker compose up -d --build
 ```
 
 ### Run Composer Commands
 
 ```bash
-docker-compose exec php composer install
+docker compose exec php composer install
 ```
 
 ### Database Access
 
 #### PostgreSQL (Write DB)
 ```bash
-docker-compose exec postgres psql -U postgres -d orders_write
+docker compose exec postgres psql -U postgres -d orders_write
 ```
 
 #### MongoDB (Read DB)
 ```bash
-docker-compose exec mongodb mongosh -u mongo -p mongo --authenticationDatabase admin
+docker compose exec mongodb mongosh -u mongo -p mongo --authenticationDatabase admin
 ```
 
 ## Testing the CQRS Flow
@@ -332,12 +332,12 @@ SELECT * FROM orders;
 ## Troubleshooting
 
 ### Consumer not processing events
-- Check consumer logs: `docker-compose logs consumer`
-- Verify RabbitMQ is running: `docker-compose ps rabbitmq`
+- Check consumer logs: `docker compose logs consumer`
+- Verify RabbitMQ is running: `docker compose ps rabbitmq`
 - Check RabbitMQ management UI for queue status
 
 ### Database connection issues
-- Ensure all containers are healthy: `docker-compose ps`
+- Ensure all containers are healthy: `docker compose ps`
 - Check environment variables in docker-compose.yml
 - Verify database credentials
 
@@ -348,12 +348,12 @@ SELECT * FROM orders;
 ## Stopping the Application
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 To also remove volumes (delete all data):
 ```bash
-docker-compose down -v
+docker compose down -v
 ```
 
 ## License
