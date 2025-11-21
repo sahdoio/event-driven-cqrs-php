@@ -11,24 +11,24 @@ get {
 }
 
 vars:pre-request {
-  orderId: replace-with-actual-order-id
+  orderId: c9eaa76c-205f-4485-a6af-c2f17c056d23
 }
 
 docs {
   # Get Order by ID (Query)
-
+  
   Retrieves a specific order by its ID. This is a read operation that:
   - Fetches data from MongoDB (read database)
   - Returns optimized read model data
-
+  
   ## Path Parameters
-
+  
   - `id` (string, required): The order UUID
-
+  
   ## Response
-
+  
   Returns a single order object:
-
+  
   ```json
   {
     "statusCode": 200,
@@ -50,11 +50,11 @@ docs {
     }
   }
   ```
-
+  
   ## Error Response
-
+  
   If the order is not found:
-
+  
   ```json
   {
     "statusCode": 404,

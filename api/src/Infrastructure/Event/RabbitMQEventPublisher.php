@@ -7,7 +7,7 @@ namespace App\Infrastructure\Event;
 use Enqueue\AmqpLib\AmqpConnectionFactory;
 use League\Event\Listener;
 
-class RabbitMQEventListener implements Listener
+class RabbitMQEventPublisher implements Listener
 {
     private $context;
     private $producer;

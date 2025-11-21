@@ -1,8 +1,9 @@
 # Variables
 DC=docker compose
 
-.PHONY: go go-hard up setup down sh logs db-init db-reset postgres-cli mongo-cli \
-        consumer health create-order get-orders rabbitmq-ui clear
+.PHONY: go go-hard up setup down sh logs logs-api logs-consumer logs-rabbit logs-app \
+        db-init db-reset postgres-cli mongo-cli consumer health create-order \
+        get-orders rabbitmq-ui queue-status clear
 
 %:
 	@:
@@ -35,7 +36,19 @@ sh:
 	$(DC) exec php sh
 
 logs:
-	$(DC) logs -f --tail=10
+	$(DC) logs -f --tail=50
+
+logs-api:
+	$(DC) logs -f php --tail=50
+
+logs-consumer:
+	$(DC) logs -f consumer --tail=50
+
+logs-rabbit:
+	$(DC) logs -f rabbitmq --tail=50
+
+log:
+	$(DC) exec php tail -f logs/app.log
 
 db-init:
 	@echo "Databases are auto-initialized on first run"
@@ -60,6 +73,10 @@ rabbitmq-ui:
 	@echo "RabbitMQ Management UI: http://localhost:15672"
 	@echo "Username: rabbitmq"
 	@echo "Password: rabbitmq"
+
+queue-status:
+	@echo "=== RabbitMQ Queue Status ==="
+	@$(DC) exec rabbitmq rabbitmqctl list_queues name messages consumers
 
 clear:
 	$(DC) exec php rm -rf api/vendor

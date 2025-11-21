@@ -7,10 +7,13 @@ use App\Application\Command\Order\UpdateOrderHandler;
 use App\Application\Query\Order\GetAllOrdersHandler;
 use App\Application\Query\Order\GetOrderHandler;
 use App\Application\Settings\SettingsInterface;
-use App\Infrastructure\Consumer\OrderEventConsumer;
 use App\Infrastructure\Database\MongoConnection;
 use App\Infrastructure\Database\PostgresConnection;
-use App\Infrastructure\Event\RabbitMQEventListener;
+use App\Infrastructure\Event\ConsumerEventRouter;
+use App\Infrastructure\Event\Listener\OrderCreatedListener;
+use App\Infrastructure\Event\Listener\OrderUpdatedListener;
+use App\Infrastructure\Event\MessageConsumer;
+use App\Infrastructure\Event\RabbitMQEventPublisher;
 use App\Infrastructure\Persistence\Order\PostgresOrderRepository;
 use App\Infrastructure\Query\MongoOrderQueryRepository;
 use DI\ContainerBuilder;
@@ -59,9 +62,9 @@ return function (ContainerBuilder $containerBuilder) {
             );
         },
 
-        // Event system
-        RabbitMQEventListener::class => function () {
-            return new RabbitMQEventListener(
+        // Event system - Publishing to RabbitMQ
+        RabbitMQEventPublisher::class => function () {
+            return new RabbitMQEventPublisher(
                 getenv('RABBITMQ_HOST') ?: 'localhost',
                 (int) (getenv('RABBITMQ_PORT') ?: 5672),
                 getenv('RABBITMQ_USER') ?: 'rabbitmq',
@@ -71,8 +74,8 @@ return function (ContainerBuilder $containerBuilder) {
 
         EventDispatcher::class => function (ContainerInterface $c) {
             $dispatcher = new EventDispatcher();
-            $dispatcher->subscribeTo('order.created', $c->get(RabbitMQEventListener::class));
-            $dispatcher->subscribeTo('order.updated', $c->get(RabbitMQEventListener::class));
+            $dispatcher->subscribeTo('order.created', $c->get(RabbitMQEventPublisher::class));
+            $dispatcher->subscribeTo('order.updated', $c->get(RabbitMQEventPublisher::class));
             return $dispatcher;
         },
 
@@ -109,14 +112,32 @@ return function (ContainerBuilder $containerBuilder) {
             return new GetAllOrdersHandler($c->get(MongoOrderQueryRepository::class));
         },
 
-        // Consumer
-        OrderEventConsumer::class => function (ContainerInterface $c) {
-            return new OrderEventConsumer(
-                $c->get(MongoConnection::class),
+        // Consumer Event Listeners
+        OrderCreatedListener::class => function (ContainerInterface $c) {
+            return new OrderCreatedListener($c->get(MongoConnection::class));
+        },
+
+        OrderUpdatedListener::class => function (ContainerInterface $c) {
+            return new OrderUpdatedListener($c->get(MongoConnection::class));
+        },
+
+        // Consumer Event Router
+        ConsumerEventRouter::class => function (ContainerInterface $c) {
+            $router = new ConsumerEventRouter($c->get(LoggerInterface::class));
+            $router->addListener($c->get(OrderCreatedListener::class));
+            $router->addListener($c->get(OrderUpdatedListener::class));
+            return $router;
+        },
+
+        // Message Consumer
+        MessageConsumer::class => function (ContainerInterface $c) {
+            return new MessageConsumer(
+                $c->get(ConsumerEventRouter::class),
                 getenv('RABBITMQ_HOST') ?: 'localhost',
                 (int) (getenv('RABBITMQ_PORT') ?: 5672),
                 getenv('RABBITMQ_USER') ?: 'rabbitmq',
-                getenv('RABBITMQ_PASS') ?: 'rabbitmq'
+                getenv('RABBITMQ_PASS') ?: 'rabbitmq',
+                $c->get(LoggerInterface::class)
             );
         },
     ]);
