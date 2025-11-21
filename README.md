@@ -123,7 +123,12 @@ cd event-driven-cqrs-php
 
 2. Start the services:
 ```bash
-docker-compose up -d
+make go
+```
+
+Or for a clean start (removes all data):
+```bash
+make go-hard
 ```
 
 This will start:
@@ -138,12 +143,45 @@ This will start:
 docker-compose ps
 ```
 
+### Service Credentials
+
+| Service | Host | Port | Username | Password | Database |
+|---------|------|------|----------|----------|----------|
+| PostgreSQL | localhost | 5432 | `postgres` | `postgres` | `orders_write` |
+| MongoDB | localhost | 27017 | `mongo` | `mongo` | `orders_read` |
+| RabbitMQ | localhost | 5672/15672 | `rabbitmq` | `rabbitmq` | - |
+
 ### Accessing Services
 
 - **API**: http://localhost:8080
 - **RabbitMQ Management**: http://localhost:15672 (user: `rabbitmq`, pass: `rabbitmq`)
 - **PostgreSQL**: localhost:5432 (user: `postgres`, pass: `postgres`, db: `orders_write`)
 - **MongoDB**: localhost:27017 (user: `mongo`, pass: `mongo`, db: `orders_read`)
+
+## API Testing with Bruno
+
+This project includes a [Bruno](https://www.usebruno.com/) API collection for testing all endpoints.
+
+### Setup
+
+1. Install Bruno from https://www.usebruno.com/
+2. Open Bruno and click "Open Collection"
+3. Navigate to `docs/bruno` folder in this project
+4. Select the "Local" environment from the environment dropdown
+
+### Available Requests
+
+| Request | Method | Description |
+|---------|--------|-------------|
+| Health Check | GET | Check if API is running |
+| Create Order | POST | Create a new order |
+| Get All Orders | GET | Retrieve all orders from MongoDB |
+| Get Order by ID | GET | Retrieve a specific order |
+| Update Order | PATCH | Update order status |
+
+### Environment Variables
+
+The collection uses a `baseUrl` variable set to `http://localhost:8080`. You can modify this in the "Local" environment if needed.
 
 ## Usage Examples
 
@@ -196,19 +234,58 @@ curl -X PATCH http://localhost:8080/orders/550e8400-e29b-41d4-a716-446655440000 
   }'
 ```
 
+## Makefile Commands
+
+| Command | Description |
+|---------|-------------|
+| `make go` | Start services and install dependencies |
+| `make go-hard` | Clean start (removes all data volumes) |
+| `make up` | Start services |
+| `make down` | Stop services |
+| `make setup` | Install composer dependencies |
+| `make sh` | Access PHP container shell |
+| `make logs` | View all service logs |
+| `make logs-api` | View API logs |
+| `make logs-consumer` | View consumer logs |
+| `make logs-rabbit` | View RabbitMQ logs |
+| `make log` | View application log file (logs/app.log) |
+| `make queue-status` | Show RabbitMQ queue status |
+| `make postgres-cli` | Access PostgreSQL CLI |
+| `make mongo-cli` | Access MongoDB CLI |
+| `make health` | Check API health |
+| `make create-order` | Create a test order |
+| `make get-orders` | Get all orders |
+| `make rabbitmq-ui` | Show RabbitMQ UI credentials |
+
 ## Monitoring
+
+### View Application Logs
+
+```bash
+make log
+```
+
+This shows the Slim application logs from `logs/app.log`.
 
 ### View Consumer Logs
 
 ```bash
-docker-compose logs -f consumer
+make logs-consumer
 ```
 
-### View API Logs
+### View All Service Logs
 
 ```bash
-docker-compose logs -f php
+make logs
 ```
+
+### Check Queue Status
+
+```bash
+make queue-status
+```
+
+Shows queue names, message count, and connected consumers.
 
 ### RabbitMQ Queue Monitoring
 

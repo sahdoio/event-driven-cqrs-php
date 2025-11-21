@@ -21,7 +21,7 @@ class CreateOrderHandler
 
     public function handle(CreateOrderCommand $command): string
     {
-        $orderId = Uuid::uuid4();
+        $orderId = Uuid::uuid7();
 
         $order = new Order(
             $orderId,

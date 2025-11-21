@@ -9,8 +9,8 @@ use League\Event\Listener;
 
 class RabbitMQEventPublisher implements Listener
 {
-    private $context;
-    private $producer;
+    private mixed $context;
+    private mixed $producer;
 
     public function __construct(
         private readonly string $host,
