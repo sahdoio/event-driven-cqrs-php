@@ -145,11 +145,24 @@ docker compose ps
 
 ### Service Credentials
 
-| Service | Host | Port | Username | Password | Database |
-|---------|------|------|----------|----------|----------|
-| PostgreSQL | localhost | 5432 | `postgres` | `postgres` | `orders_write` |
-| MongoDB | localhost | 27017 | `mongo` | `mongo` | `orders_read` |
-| RabbitMQ | localhost | 5672/15672 | `rabbitmq` | `rabbitmq` | - |
+| Service | Host | Port | Username | Password | Database | Auth Source |
+|---------|------|------|----------|----------|----------|-------------|
+| PostgreSQL | localhost | 5432 | `postgres` | `postgres` | `orders_write` | - |
+| MongoDB | localhost | 27017 | `mongo` | `mongo` | `orders_read` | `orders_read` |
+| RabbitMQ | localhost | 5672/15672 | `rabbitmq` | `rabbitmq` | - | - |
+
+#### Connection Strings
+
+```bash
+# PostgreSQL
+postgresql://postgres:postgres@localhost:5432/orders_write
+
+# MongoDB
+mongodb://mongo:mongo@localhost:27017/orders_read?authSource=orders_read
+
+# RabbitMQ (AMQP)
+amqp://rabbitmq:rabbitmq@localhost:5672
+```
 
 ### Accessing Services
 
