@@ -24,18 +24,19 @@
     "require": {
         "php": "^8.4",
         "ext-json": "*",
+        "ext-mongodb": "*",
         "ext-pdo": "*",
         "ext-pdo_pgsql": "*",
-        "ext-mongodb": "*",
-        "monolog/monolog": "^2.8",
-        "php-di/php-di": "^7.0",
-        "slim/psr7": "^1.5",
-        "slim/slim": "^4.10",
         "enqueue/amqp-lib": "^0.10",
         "enqueue/enqueue": "^0.10",
-        "ramsey/uuid": "^4.7",
+        "league/event": "^3.0",
         "mongodb/mongodb": "^2.0",
-        "league/event": "^3.0"
+        "monolog/monolog": "^2.8",
+        "php-di/php-di": "^7.0",
+        "ramsey/uuid": "^4.7",
+        "slim/psr7": "^1.5",
+        "slim/slim": "^4.10",
+        "vlucas/phpdotenv": "^5.6"
     },
     "require-dev": {
         "jangregor/phpstan-prophecy": "^1.0.0",

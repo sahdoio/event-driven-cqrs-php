@@ -90,21 +90,13 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    env_file:
+      - ./api/.env
     environment:
+      # Override hosts to use Docker service names
       DB_WRITE_HOST: postgres
-      DB_WRITE_PORT: 5432
-      DB_WRITE_NAME: orders_write
-      DB_WRITE_USER: postgres
-      DB_WRITE_PASS: postgres
       DB_READ_HOST: mongodb
-      DB_READ_PORT: 27017
-      DB_READ_NAME: orders_read
-      DB_READ_USER: mongo
-      DB_READ_PASS: mongo
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: rabbitmq
-      RABBITMQ_PASS: rabbitmq
     command: php -S 0.0.0.0:8080 -t public
 
   consumer:
@@ -124,19 +116,11 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    env_file:
+      - ./api/.env
     environment:
+      # Override hosts to use Docker service names
       DB_WRITE_HOST: postgres
-      DB_WRITE_PORT: 5432
-      DB_WRITE_NAME: orders_write
-      DB_WRITE_USER: postgres
-      DB_WRITE_PASS: postgres
       DB_READ_HOST: mongodb
-      DB_READ_PORT: 27017
-      DB_READ_NAME: orders_read
-      DB_READ_USER: mongo
-      DB_READ_PASS: mongo
       RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
-      RABBITMQ_USER: rabbitmq
-      RABBITMQ_PASS: rabbitmq
     command: php bin/consumer.php
